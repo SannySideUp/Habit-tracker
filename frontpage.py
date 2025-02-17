@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import *
-from PyQt5 import uic, QtWidgets
+from PyQt5 import uic, QtGui
 import os
 import sys
 import pyrebase
 
-# Firebase configuration settings
+# Firebase Configuration
 firebaseConfig = {
     "apiKey": "AIzaSyCx6-n1Zo-VXBPx8mPcXsDsSqt6sUFqTFI",
     "authDomain": "habit-9fe64.firebaseapp.com",
@@ -16,119 +16,225 @@ firebaseConfig = {
     "measurementId": "G-P2FHLC3000"
 }
 
-# Initialize Firebase
 firebase = pyrebase.initialize_app(firebaseConfig)
-databases = firebase.database()  # Reference to Firebase Realtime Database
-authfire = firebase.auth()  # Firebase authentication reference
+databases = firebase.database()
+authfire = firebase.auth()
 
+# --------------------- Twitter-Style UI ---------------------
+TWITTER_BLUE = "#1DA1F2"
+DARK_MODE_BG = "#15202B"
+LIGHT_MODE_BG = "#FFFFFF"
+TEXT_COLOR_LIGHT = "#000000"
+TEXT_COLOR_DARK = "#FFFFFF"
+
+
+# --------------------- Login Window ---------------------
 class Login(QMainWindow):
-    """Login window where users enter their email and password to log in."""
-
     def __init__(self):
         super(Login, self).__init__()
-        uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)  # Load the UI file
-        self.show()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)
 
-        # Connect buttons to their functions
-        self.pushButton.clicked.connect(self.login)  # Login button
-        self.signupbutton.clicked.connect(self.goCreateAccount)  # Signup button
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        self.pushButton.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.signupbutton.setStyleSheet(f"""
+            QPushButton {{
+                background-color: transparent;
+                color: {TWITTER_BLUE};
+                font-size: 14px;
+                border: none;
+            }}
+            QPushButton:hover {{
+                text-decoration: underline;
+            }}
+        """)
+
+        # Placeholder Text
+        self.email.setPlaceholderText("Email or Username")
+        self.password.setPlaceholderText("Password")
+        self.password.setEchoMode(QLineEdit.Password)
+
+        self.pushButton.clicked.connect(self.login)
+        self.signupbutton.clicked.connect(self.goCreateAccount)
+        self.checkBox.clicked.connect(self.showPassword)
 
     def login(self):
-        """Handles user login authentication using Firebase."""
         email = self.email.text()
         password = self.password.text()
-        
+        if not email or not password:
+            self.showError("Both fields are required!")
+            return
+
         try:
-            authfire.sign_in_with_email_and_password(email, password)  # Authenticate user
-            login_successful = True  # If authentication succeeds, set login to True
+            authfire.sign_in_with_email_and_password(email, password)
+            widget.setCurrentIndex(2)
         except:
-            login_successful = False  # If authentication fails, set login to False
+            self.showError("Invalid Email or Password!")
 
-        print(login_successful)  # Debugging print statement
-
-        if login_successful:
-            widget.setCurrentIndex(2)  # Switch to the Habit Tracker page
-        else:
-            # Show error message for invalid login credentials
-            error = QMessageBox()
-            error.setIcon(QMessageBox.Critical)
-            error.setText("Invalid ID")
-            error.setWindowTitle("Login Error")
-            error.exec_()
-    
     def goCreateAccount(self):
-        """Switch to the Signup window."""
         widget.setCurrentIndex(1)
 
-class CreateAcc(QMainWindow):
-    """Signup window where users create an account."""
+    def showError(self, message):
+        error = QMessageBox()
+        error.setIcon(QMessageBox.Critical)
+        error.setText(message)
+        error.setWindowTitle("Error")
+        error.exec_()
+    
+    def showPassword(self):
+        if self.checkBox.isChecked():
+            self.password.setEchoMode(QLineEdit.Normal)
+        else:
+            self.password.setEchoMode(QLineEdit.Password)
 
+
+# --------------------- Sign Up Window ---------------------
+class CreateAcc(QMainWindow):
     def __init__(self):
         super(CreateAcc, self).__init__()
-        uic.loadUi(os.path.join(os.path.dirname(__file__), "SignUp.ui"), self)  # Load UI file
-        
-        # Ensure these input fields exist in SignUp.ui
-        self.password.setEchoMode(QLineEdit.Password)  # Hide password input
-        self.confirmPassword.setEchoMode(QLineEdit.Password)  # Hide confirm password input
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "SignUp.ui"), self)
 
-        # Connect signup button to create account function
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        self.signupbutton.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        # Placeholder text
+        self.email.setPlaceholderText("Your Email")
+        self.password.setPlaceholderText("Create a Password")
+        self.confirmPassword.setPlaceholderText("Confirm Password")
+
+        self.password.setEchoMode(QLineEdit.Password)
+        self.confirmPassword.setEchoMode(QLineEdit.Password)
+
         self.signupbutton.clicked.connect(self.createAccountFunction)
-    
+
     def createAccountFunction(self):
-        """Handles new user account creation with Firebase."""
-        email = self.email.text()  # Get email input
+        email = self.email.text()
         password = self.password.text()
         confirm_password = self.confirmPassword.text()
 
-        if password == confirm_password and len(password) > 4:
-            # Passwords match and meet the length requirement
-            print(f"Successfully created account with email: {email}")
-            authfire.create_user_with_email_and_password(email, password)  # Create user in Firebase
-            
-            widget.setCurrentIndex(0)  # Switch back to login screen
-        else:
-            # Show error message for mismatched or short passwords
-            error = QMessageBox()
-            error.setIcon(QMessageBox.Warning)
-            error.setText("Passwords do not match or Password is too short!")
-            error.setWindowTitle("Signup Error")
-            error.exec_()
+        if not email or not password or not confirm_password:
+            self.showError("All fields are required!")
+            return
 
+        if password != confirm_password:
+            self.showError("Passwords do not match!")
+            return
+
+        if len(password) < 6:
+            self.showError("Password must be at least 6 characters!")
+            return
+
+        try:
+            authfire.create_user_with_email_and_password(email, password)
+            widget.setCurrentIndex(0)
+        except:
+            self.showError("Account creation failed. Try again.")
+
+    def showError(self, message):
+        error = QMessageBox()
+        error.setIcon(QMessageBox.Warning)
+        error.setText(message)
+        error.setWindowTitle("Signup Error")
+        error.exec_()
+
+
+# --------------------- Habit Tracker Window ---------------------
 class HabitTracker(QMainWindow):
-    """Habit Tracker application window."""
-
     def __init__(self):
         super(HabitTracker, self).__init__()
-        uic.loadUi(os.path.join(os.path.dirname(__file__), "HabitTracker.ui"), self)  # Load UI file
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "HabitTracker.ui"), self)
+
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        self.pushButton_2.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
         self.show()
-
-        # Connect button to function
         self.pushButton_2.clicked.connect(lambda: self.sayit(self.textEdit.toPlainText()))
-    
-    def sayit(self, msg):
-        """Displays a message in a pop-up window."""
-        message = QMessageBox()
-        message.setText(msg)
-        message.exec_()
 
-# Initialize the QApplication and QStackedWidget for navigation between pages
+    def sayit(self, msg):
+        if msg.strip():
+            message = QMessageBox()
+            message.setText(msg)
+            message.exec_()
+            databases.child("database").child("Users").update("habits",msg)
+        else:
+            self.showError("Please enter a message!")
+
+    def showError(self, message):
+        error = QMessageBox()
+        error.setIcon(QMessageBox.Warning)
+        error.setText(message)
+        error.setWindowTitle("Error")
+        error.exec_()
+
+
+# --------------------- App Initialization ---------------------
 app = QApplication(sys.argv)
 widget = QStackedWidget()
 
-# Create instances of the pages
-mainWindow = Login()  # Login page
-createAccountWindow = CreateAcc()  # Signup page
-habitTrackerWindow = HabitTracker()  # Habit Tracker page
+mainWindow = Login()
+createAccountWindow = CreateAcc()
+App = HabitTracker()
 
-# Add pages to the stacked widget
-widget.addWidget(mainWindow)  # Index 0: Login page
-widget.addWidget(createAccountWindow)  # Index 1: Signup page
-widget.addWidget(habitTrackerWindow)  # Index 2: Habit Tracker page
+widget.addWidget(mainWindow)
+widget.addWidget(createAccountWindow)
+widget.addWidget(App)
 
-# Set up and display the main application window
-widget.setFixedHeight(400)
-widget.setFixedWidth(600)
+widget.setFixedHeight(500)
+widget.setFixedWidth(650)
 widget.show()
 
-# Start the application event loop
 sys.exit(app.exec_())
