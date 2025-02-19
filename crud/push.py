@@ -7,7 +7,6 @@ from utils.config import firebaseConfig
 def userDB(userPath):
     firebaseConfigHabit = {}
     for key,value in firebaseConfig.items():
-        print(key,value)
         if key == "databaseURL":
             firebaseConfigHabit[key] = value+"/habits/"+userPath
         else:
