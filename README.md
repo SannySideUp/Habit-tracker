@@ -20,3 +20,6 @@
 |7. Streaks | **N**|
 |8. Progress report (Graphs etc) | **N**|
 
+![Happy Pixel GIF by SMOL](https://github.com/user-attachments/assets/2e39cdca-5ea5-4467-bec3-980fd1ee8929)
+
+
