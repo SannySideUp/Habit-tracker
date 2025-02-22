@@ -22,11 +22,61 @@ authfire = firebase.auth()
 
 # --------------------- Twitter-Style UI ---------------------
 TWITTER_BLUE = "#1DA1F2"
-DARK_MODE_BG = "#15202B"
-LIGHT_MODE_BG = "#FFFFFF"
+DARK_MODE = "#15202B"
+LIGHT_MODE = "#FFFFFF"
 TEXT_COLOR_LIGHT = "#000000"
 TEXT_COLOR_DARK = "#FFFFFF"
+# --------------------- Frontpage Window ---------------------
 
+class frontpage(QMainWindow):
+    def __init__(self):
+        super(frontpage, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "welcome page.ui"), self)
+
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        self.login.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.signUp.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.login.clicked.connect(self.loginButton)
+        self.signUp.clicked.connect(self.signUpButton)
+
+    def loginButton(self):
+            widget.setCurrentIndex(1)
+
+    def signUpButton(self):
+            widget.setCurrentIndex(2)
 
 # --------------------- Login Window ---------------------
 class Login(QMainWindow):
@@ -35,7 +85,7 @@ class Login(QMainWindow):
         uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)
 
         self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
+            background-color: {DARK_MODE};
             color: {TEXT_COLOR_DARK};
             font-family: 'Segoe UI', Arial, sans-serif;
         """)
@@ -85,12 +135,12 @@ class Login(QMainWindow):
 
         try:
             authfire.sign_in_with_email_and_password(email, password)
-            widget.setCurrentIndex(2)
+            widget.setCurrentIndex(3)
         except:
             self.showError("Invalid Email or Password!")
 
     def goCreateAccount(self):
-        widget.setCurrentIndex(1)
+        widget.setCurrentIndex(2)
 
     def showError(self, message):
         error = QMessageBox()
@@ -113,7 +163,7 @@ class CreateAcc(QMainWindow):
         uic.loadUi(os.path.join(os.path.dirname(__file__), "SignUp.ui"), self)
 
         self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
+            background-color: {DARK_MODE};
             color: {TEXT_COLOR_DARK};
             font-family: 'Segoe UI', Arial, sans-serif;
         """)
@@ -134,6 +184,7 @@ class CreateAcc(QMainWindow):
         """)
 
         # Placeholder text
+        self.name.setPlaceholderText("Your Name")
         self.email.setPlaceholderText("Your Email")
         self.password.setPlaceholderText("Create a Password")
         self.confirmPassword.setPlaceholderText("Confirm Password")
@@ -162,7 +213,7 @@ class CreateAcc(QMainWindow):
 
         try:
             authfire.create_user_with_email_and_password(email, password)
-            widget.setCurrentIndex(0)
+            widget.setCurrentIndex(1)
         except:
             self.showError("Account creation failed. Try again.")
 
@@ -181,7 +232,7 @@ class HabitTracker(QMainWindow):
         uic.loadUi(os.path.join(os.path.dirname(__file__), "HabitTracker.ui"), self)
 
         self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
+            background-color: {DARK_MODE};
             color: {TEXT_COLOR_DARK};
             font-family: 'Segoe UI', Arial, sans-serif;
         """)
@@ -225,16 +276,18 @@ class HabitTracker(QMainWindow):
 app = QApplication(sys.argv)
 widget = QStackedWidget()
 
+welcome = frontpage()
 mainWindow = Login()
 createAccountWindow = CreateAcc()
 App = HabitTracker()
 
+widget.addWidget(welcome)
 widget.addWidget(mainWindow)
 widget.addWidget(createAccountWindow)
 widget.addWidget(App)
 
-widget.setFixedHeight(500)
-widget.setFixedWidth(650)
+widget.setFixedHeight(300)
+widget.setFixedWidth(500)
 widget.show()
 
 sys.exit(app.exec_())
