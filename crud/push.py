@@ -5,24 +5,23 @@ import pyrebase
 from utils.config import firebaseConfig
 from utils.generateID import generateRandomUserID
 #copy original config and modify the url
-def userDB(userPath):
-    firebaseConfigHabit = {}
-    for key,value in firebaseConfig.items():
+def userDB(user_path,firebase_config):
+    firebase_config_habit = {}
+    for key,value in firebase_config.items():
         if key == "databaseURL":
-            firebaseConfigHabit[key] = value+userPath
-            print(value+userPath)
+            firebase_config_habit[key] = value+user_path
         else:
-            firebaseConfigHabit[key] = value
-    return firebaseConfigHabit
+            firebase_config_habit[key] = value
+    return firebase_config_habit
 
-def makeNewPath(path):
-    config = userDB(path)
+def makeNewPath(path,firebase_config):
+    config = userDB(path,firebase_config)
     firebase = pyrebase.initialize_app(config)
     return firebase.database() 
 
 userPath = "-OJTQx0MIMXm4z5DeAF8"
 userPath1="/habits/"
-db = makeNewPath(userPath1)
+db = makeNewPath(userPath1,firebaseConfig)
 
 def push(db): #will generate a random id in the database
     db.push({"key": "value"})
@@ -33,7 +32,7 @@ def appendToUser(db,key, value):
 def appendNewUser(db,UUID, key,value):
     db.child(UUID).child(key).set(value)
 
-usersDb = makeNewPath("")
+usersDb = makeNewPath("",firebaseConfig)
 #push(usersDb)
 def createNewUser(db,email,password):
     UUID = generateRandomUserID()
@@ -41,6 +40,17 @@ def createNewUser(db,email,password):
 email = "fake@gmail.com"
 password = "fakepassword"
 UUID = generateRandomUserID()
-appendNewUser(usersDb, "users",UUID, "anotherfake@gmail.com")
+#appendNewUser(usersDb, "users",UUID, "anotherfake@gmail.com")
 #createNewUser(usersDb,email,password)
 #appendToUser(usersDb, "users",generateRandomUserID())
+
+def addHabits(path,firebase_config,data):
+    db = makeNewPath(path,firebase_config)
+    db.push(data)
+
+def create_new_user_in_users(path,firebase_config, UUID, key, value):
+    db = makeNewPath(path,firebase_config)
+    db.child(UUID).child(key).set(value)
+
+def create_new_user_in_habits( db, UUID,data):
+    db.child("habits").child(UUID).set(data)
