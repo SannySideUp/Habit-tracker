@@ -1,10 +1,12 @@
 from PyQt5.QtWidgets import *
-from PyQt5 import uic, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5 import uic, QtGui
+from PyQt5.QtCore import pyqtSignal, Qt
 import os
 import sys
 import pyrebase
 
-# Firebase configuration settings
+# Firebase Configuration
 firebaseConfig = {
     "apiKey": "AIzaSyCx6-n1Zo-VXBPx8mPcXsDsSqt6sUFqTFI",
     "authDomain": "habit-9fe64.firebaseapp.com",
@@ -16,119 +18,555 @@ firebaseConfig = {
     "measurementId": "G-P2FHLC3000"
 }
 
-# Initialize Firebase
 firebase = pyrebase.initialize_app(firebaseConfig)
-databases = firebase.database()  # Reference to Firebase Realtime Database
-authfire = firebase.auth()  # Firebase authentication reference
+databases = firebase.database()
+authfire = firebase.auth()
 
+# --------------------- Twitter-Style UI ---------------------
+TWITTER_BLUE = "#1DA1F2"
+DARK_MODE_BG = "#15202B"
+LIGHT_MODE_BG = "#FFFFFF"
+TEXT_COLOR_LIGHT = "#000000"
+TEXT_COLOR_DARK = "#FFFFFF"
+
+
+# --------------------- Login Window ---------------------
 class Login(QMainWindow):
-    """Login window where users enter their email and password to log in."""
-
     def __init__(self):
         super(Login, self).__init__()
-        uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)  # Load the UI file
-        self.show()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)
 
-        # Connect buttons to their functions
-        self.pushButton.clicked.connect(self.login)  # Login button
-        self.signupbutton.clicked.connect(self.goCreateAccount)  # Signup button
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        self.pushButton.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.signupbutton.setStyleSheet(f"""
+            QPushButton {{
+                background-color: transparent;
+                color: {TWITTER_BLUE};
+                font-size: 14px;
+                border: none;
+            }}
+            QPushButton:hover {{
+                text-decoration: underline;
+            }}
+        """)
+
+        # Placeholder Text
+        self.email.setPlaceholderText("Email or Username")
+        self.password.setPlaceholderText("Password")
+        self.password.setEchoMode(QLineEdit.Password)
+
+        self.pushButton.clicked.connect(self.login)
+        self.signupbutton.clicked.connect(self.goCreateAccount)
+        self.checkBox.clicked.connect(self.showPassword)
 
     def login(self):
-        """Handles user login authentication using Firebase."""
         email = self.email.text()
         password = self.password.text()
-        
+        if not email or not password:
+            self.showError("Both fields are required!")
+            return
+
         try:
-            authfire.sign_in_with_email_and_password(email, password)  # Authenticate user
-            login_successful = True  # If authentication succeeds, set login to True
+            authfire.sign_in_with_email_and_password(email, password)
+            welcome_screen = WelcomeScreen()
+            widget.addWidget(welcome_screen)
+            widget.setCurrentWidget(welcome_screen)
         except:
-            login_successful = False  # If authentication fails, set login to False
+            self.showError("Invalid Email or Password!")
 
-        print(login_successful)  # Debugging print statement
-
-        if login_successful:
-            widget.setCurrentIndex(2)  # Switch to the Habit Tracker page
-        else:
-            # Show error message for invalid login credentials
-            error = QMessageBox()
-            error.setIcon(QMessageBox.Critical)
-            error.setText("Invalid ID")
-            error.setWindowTitle("Login Error")
-            error.exec_()
-    
     def goCreateAccount(self):
-        """Switch to the Signup window."""
         widget.setCurrentIndex(1)
 
-class CreateAcc(QMainWindow):
-    """Signup window where users create an account."""
+    def showError(self, message):
+        error = QMessageBox()
+        error.setIcon(QMessageBox.Critical)
+        error.setText(message)
+        error.setWindowTitle("Error")
+        error.exec_()
+    
+    def showPassword(self):
+        if self.checkBox.isChecked():
+            self.password.setEchoMode(QLineEdit.Normal)
+        else:
+            self.password.setEchoMode(QLineEdit.Password)
 
+
+# --------------------- Sign Up Window ---------------------
+class CreateAcc(QMainWindow):
     def __init__(self):
         super(CreateAcc, self).__init__()
-        uic.loadUi(os.path.join(os.path.dirname(__file__), "SignUp.ui"), self)  # Load UI file
-        
-        # Ensure these input fields exist in SignUp.ui
-        self.password.setEchoMode(QLineEdit.Password)  # Hide password input
-        self.confirmPassword.setEchoMode(QLineEdit.Password)  # Hide confirm password input
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "SignUp.ui"), self)
 
-        # Connect signup button to create account function
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        self.signupbutton.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        # Placeholder text
+        self.email.setPlaceholderText("Your Email")
+        self.password.setPlaceholderText("Create a Password")
+        self.confirmPassword.setPlaceholderText("Confirm Password")
+
+        self.password.setEchoMode(QLineEdit.Password)
+        self.confirmPassword.setEchoMode(QLineEdit.Password)
+
         self.signupbutton.clicked.connect(self.createAccountFunction)
-    
+
     def createAccountFunction(self):
-        """Handles new user account creation with Firebase."""
-        email = self.email.text()  # Get email input
+        email = self.email.text()
         password = self.password.text()
         confirm_password = self.confirmPassword.text()
 
-        if password == confirm_password and len(password) > 4:
-            # Passwords match and meet the length requirement
-            print(f"Successfully created account with email: {email}")
-            authfire.create_user_with_email_and_password(email, password)  # Create user in Firebase
-            
-            widget.setCurrentIndex(0)  # Switch back to login screen
-        else:
-            # Show error message for mismatched or short passwords
-            error = QMessageBox()
-            error.setIcon(QMessageBox.Warning)
-            error.setText("Passwords do not match or Password is too short!")
-            error.setWindowTitle("Signup Error")
-            error.exec_()
+        if not email or not password or not confirm_password:
+            self.showError("All fields are required!")
+            return
 
-class HabitTracker(QMainWindow):
-    """Habit Tracker application window."""
+        if password != confirm_password:
+            self.showError("Passwords do not match!")
+            return
+
+        if len(password) < 6:
+            self.showError("Password must be at least 6 characters!")
+            return
+
+        try:
+            authfire.create_user_with_email_and_password(email, password)
+            widget.setCurrentIndex(0)
+        except:
+            self.showError("Account creation failed. Try again.")
+
+    def showError(self, message):
+        error = QMessageBox()
+        error.setIcon(QMessageBox.Warning)
+        error.setText(message)
+        error.setWindowTitle("Signup Error")
+        error.exec_()
+
+
+# --------------------- WelcomeScreen Window ---------------------
+class WelcomeScreen(QMainWindow):
+    def __init__(self):
+        super(WelcomeScreen, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "WelcomeScreen.ui"), self)
+
+        # Apply the background and text styles for the entire window
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        # Apply the button styles
+        self.AddHabit.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+        
+        self.DeleteHabit.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.ViewHabit.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.LogOut.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.Calendar.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        self.Streaks.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {TWITTER_BLUE};
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                padding: 10px;
+                width: 250px;
+            }}
+            QPushButton:hover {{
+                background-color: #0D8AEF;
+            }}
+        """)
+
+        # Connections
+        self.AddHabit.clicked.connect(self.on_add_habit)
+        self.DeleteHabit.clicked.connect(self.on_delete_habit)
+        
+
+    def on_add_habit(self):
+        self.add_habit = AddHabit()
+        self.add_habit.show()
+        
+
+    def on_delete_habit(self):
+        self.delete_habit = DeleteHabit()
+        self.delete_habit.exec_()  # Show the DeleteHabit dialog
+
+
+# --------------------- AddHabit Dialogue --------------------
+
+class AddHabit(QDialog):
+    # Signal to close the dialog
+    close_dialog_signal = pyqtSignal()
 
     def __init__(self):
-        super(HabitTracker, self).__init__()
-        uic.loadUi(os.path.join(os.path.dirname(__file__), "HabitTracker.ui"), self)  # Load UI file
-        self.show()
+        super(AddHabit, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "AddHabit.ui"), self)
 
-        # Connect button to function
-        self.pushButton_2.clicked.connect(lambda: self.sayit(self.textEdit.toPlainText()))
-    
-    def sayit(self, msg):
-        """Displays a message in a pop-up window."""
-        message = QMessageBox()
-        message.setText(msg)
-        message.exec_()
+        # Connect the signal to the accept() method
+        self.close_dialog_signal.connect(self.accept)
 
-# Initialize the QApplication and QStackedWidget for navigation between pages
+        # Set background color and text color
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        # Set the style for the TitleInput (QLineEdit) with hover effect and dark blue input text
+        self.TitleInput.setStyleSheet("""
+            QLineEdit {
+                background-color: #FFFFFF;
+                border: 1px solid #CCCCCC;
+                border-radius: 5px;
+                padding: 5px;
+                color: #1D3C6A;  
+            }
+            QLineEdit:hover {
+                background-color: #D9F1FF;  
+            }
+        """)
+
+        # Set the style for the DescriptionInput (QTextEdit) with hover effect and dark blue input text
+        self.DescriptionInput.setStyleSheet("""
+            QTextEdit {
+                background-color: #FFFFFF;
+                border: 1px solid #CCCCCC;
+                border-radius: 5px;
+                padding: 5px;
+                color: #1D3C6A;  
+            }
+            QTextEdit:hover {
+                background-color: #D9F1FF;  
+            }
+        """)
+
+        # Set the style for the RepeatsBox (QComboBox) with hover effect and visible text
+        self.RepeatsBox.setStyleSheet("""
+            QComboBox {
+                background-color: #FFFFFF;
+                border: 1px solid #CCCCCC;
+                border-radius: 5px;
+                padding: 5px;
+                color: #1D3C6A;  
+            }
+            QComboBox:hover {
+                background-color: #D9F1FF;  
+            }
+            QComboBox:editable {
+                color: #1D3C6A;  
+            }
+        """)
+
+        # Set the style for the DifficultyBox (QComboBox) with hover effect and visible text
+        self.DifficultyBox.setStyleSheet("""
+            QComboBox {
+                background-color: #FFFFFF;
+                border: 1px solid #CCCCCC;
+                border-radius: 5px;
+                padding: 5px;
+                color: #1D3C6A;  
+            }
+            QComboBox:hover {
+                background-color: #D9F1FF;  
+            }
+            QComboBox:editable {
+                color: #1D3C6A;  
+            }
+        """)
+
+        # Set the style for the Save and Cancel buttons
+        save_button = self.CancelSaveBox.button(QDialogButtonBox.Save)
+        cancel_button = self.CancelSaveBox.button(QDialogButtonBox.Cancel)
+
+        save_button.setStyleSheet("""
+            QPushButton {
+                background-color: #A1D6FF;  
+                border: 1px solid #4A90E2;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #91C9FF;  
+            }
+        """)
+
+        cancel_button.setStyleSheet("""
+            QPushButton {
+                background-color: #A1D6FF;  
+                border: 1px solid #4A90E2;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #91C9FF;  
+            }
+        """)
+
+        # Set labels (DescriptionLabel, DifficultyLabel, RepeatsLabel, StartDateLabel, TitleLabel)
+        self.DescriptionLabel.setStyleSheet("""
+            QLabel {
+                font-weight: bold;
+            }
+        """)
+        
+        self.DifficultyLabel.setStyleSheet("""
+            QLabel {
+                font-weight: bold;
+            }
+        """)
+
+        self.RepeatsLabel.setStyleSheet("""
+            QLabel {
+                font-weight: bold;
+            }
+        """)
+
+        self.StartDateLabel.setStyleSheet("""
+            QLabel {
+                font-weight: bold;
+            }
+        """)
+
+        self.TitleLabel.setStyleSheet("""
+            QLabel {
+                font-weight: bold;
+            }
+        """)
+
+        # Connect buttons
+        save_button.clicked.connect(self.saveHabit)
+        cancel_button.clicked.connect(self.reject)
+
+    def saveHabit(self):
+        save_button = self.CancelSaveBox.button(QDialogButtonBox.Save)
+        save_button.setEnabled(False)
+
+        # Retrieve the input values
+        title = self.TitleInput.text()
+        description = self.DescriptionInput.toPlainText()
+        start_date = self.CalenderWidget.selectedDate().toString("yyyy-MM-dd")
+        repeat = self.RepeatsBox.currentText()
+        difficulty = self.DifficultyBox.currentText()
+
+        if not title or not description:
+            QMessageBox.warning(self, "Input Error", "Please fill in all fields")
+            save_button.setEnabled(True)
+            return
+        
+        # Save to Firebase
+        habit_data = {
+            "title": title,
+            "description": description,
+            "start_date": start_date,
+            "repeat": repeat,
+            "difficulty": difficulty
+        }
+
+        # Firebase save operation
+        try:
+            databases.child("user").push(habit_data)
+            QMessageBox.information(self, "Success", "Habit added successfully!")
+            self.close_dialog_signal.emit()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to add habit: {str(e)}")
+            save_button.setEnabled(True)
+
+# --------------------- DeleteHabit Dialogue --------------------
+
+class DeleteHabit(QDialog):
+    def __init__(self):
+        super(DeleteHabit, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "DeleteHabit.ui"), self)
+
+        # Set styles
+        self.setStyleSheet(f"""
+            background-color: {DARK_MODE_BG};
+            color: {TEXT_COLOR_DARK};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        """)
+
+        # Access the QListWidget and QPushButton
+        self.habit_list = self.findChild(QListWidget, "habit_list")
+        self.delete_button = self.findChild(QPushButton, "delete_button")
+
+        # Connect the delete button to a function
+        self.delete_button.clicked.connect(self.delete_selected_habit)
+
+        # Load habits into the list
+        self.fetch_habits()
+
+    def fetch_habits(self):
+        try:
+            habits = databases.child("user").child(habit_id).get()
+            if habits.each() is not None:
+                self.habit_list.clear()  # Clear the list widget before adding new items
+                for habit in habits.each():
+                    habit_data = habit.val()
+                    habit_text = f"{habit_data['title']}"  # Display only the title
+                    item = QListWidgetItem(habit_text)
+                    item.setData(Qt.UserRole, habit.key())  # Store habit ID in the item
+                    self.habit_list.addItem(item)  # Add habit to the list widget
+            else:
+                print("No habits found in the database.")
+        except Exception as e:
+            print("Failed to fetch habits:", str(e))
+
+    def delete_selected_habit(self):
+        selected_habit = self.habit_list.currentItem()
+        if selected_habit:
+            habit_id = selected_habit.data(Qt.UserRole)  # Retrieve habit ID from the list item
+            try:
+                databases.child("user").child(habit_id).remove()
+                QMessageBox.information(self, "Success", "Habit deleted successfully!")
+                self.fetch_habits()  # Refresh the list after deletion
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to delete habit: {str(e)}")
+        else:
+            QMessageBox.warning(self, "Error", "Please select a habit to delete.")
+
+
+# --------------------- App Initialization ---------------------
 app = QApplication(sys.argv)
 widget = QStackedWidget()
 
-# Create instances of the pages
-mainWindow = Login()  # Login page
-createAccountWindow = CreateAcc()  # Signup page
-habitTrackerWindow = HabitTracker()  # Habit Tracker page
+mainWindow = Login()
+createAccountWindow = CreateAcc()
+welcome_screen = WelcomeScreen()
 
-# Add pages to the stacked widget
-widget.addWidget(mainWindow)  # Index 0: Login page
-widget.addWidget(createAccountWindow)  # Index 1: Signup page
-widget.addWidget(habitTrackerWindow)  # Index 2: Habit Tracker page
+widget.addWidget(mainWindow)
+widget.addWidget(createAccountWindow)
+widget.addWidget(welcome_screen)
 
-# Set up and display the main application window
-widget.setFixedHeight(400)
-widget.setFixedWidth(600)
+widget.setFixedHeight(500)
+widget.setFixedWidth(650)
 widget.show()
 
-# Start the application event loop
 sys.exit(app.exec_())
+
+# --------------------- App Initialization ---------------------
+app = QApplication(sys.argv)
+widget = QStackedWidget()
+
+mainWindow = Login()
+createAccountWindow = CreateAcc()
+welcome_screen = WelcomeScreen()
+
+
+widget.addWidget(mainWindow)
+widget.addWidget(createAccountWindow)
+widget.addWidget(welcome_screen)
+
+widget.setFixedHeight(500)
+widget.setFixedWidth(650)
+widget.show()
+
+sys.exit(app.exec_())
+
+
