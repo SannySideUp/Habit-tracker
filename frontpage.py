@@ -135,8 +135,6 @@ class HabitTracker(QMainWindow):
         print("username: ",userName['name'])
         newHabit = {"habit": "another new habit", "intensity":"high"}
         addHabits(path,firebaseConfig,newHabit)
-
-
         self.pushButton_2.clicked.connect(lambda: self.sayit(self.textEdit.toPlainText()))
     
     def sayit(self, msg):
@@ -151,8 +149,11 @@ app = QApplication(sys.argv)
 widget = QStackedWidget()
 
 # Create instances of the pages
-mainWindow = Login() # Login page
-widget.addWidget(mainWindow)  # Index 0: Login page
+mainWindow = Login()
+createAccountWindow = CreateAcc() # Login page
+widget.addWidget(mainWindow)  
+widget.addWidget(createAccountWindow)
+# Index 0: Login page
 
 
 # Set up and display the main application window
