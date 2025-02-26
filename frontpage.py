@@ -158,6 +158,7 @@ class CreateAcc(QMainWindow):
         email = self.email.text()
         password = self.password.text()
         confirm_password = self.confirmPassword.text()
+        name = self.name.text() ###get user's name
 
         if not email or not password or not confirm_password:
             self.showError("All fields are required!")
@@ -172,7 +173,9 @@ class CreateAcc(QMainWindow):
             return
 
         try:
-            authfire.create_user_with_email_and_password(email, password)
+            user = authfire.create_user_with_email_and_password(email, password)
+            userID = user['localId']
+            self.add_username(databases,userID,name)
             widget.setCurrentIndex(0)
         except:
             self.showError("Account creation failed. Try again.")
@@ -184,14 +187,16 @@ class CreateAcc(QMainWindow):
         error.setWindowTitle("Signup Error")
         error.exec_()
 
+    def add_username(self, db, UUID, name): #add user name to display on welcome screen
+        db.child(UUID).child("name").push(name)
+
 
 # --------------------- WelcomeScreen Window ---------------------
 class WelcomeScreen(QMainWindow):
     def __init__(self,userID):
         super(WelcomeScreen, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "WelcomeScreen.ui"), self)
-        #add userID
-        self.userID = userID
+        self.userID = userID #add userID
 
         # Apply the background and text styles for the entire window
         self.setStyleSheet(f"""
@@ -486,7 +491,7 @@ class AddHabit(QDialog):
 
         # Firebase save operation
         try:
-            databases.child(self.userID).push(habit_data)#change node
+            databases.child(self.userID).child("habits").push(habit_data)#change node
             QMessageBox.information(self, "Success", "Habit added successfully!")
             self.close_dialog_signal.emit()
         except Exception as e:
@@ -519,7 +524,7 @@ class DeleteHabit(QDialog):
 
     def fetch_habits(self):
         try:
-            habits = databases.child(self.userID).get() #get user's habits
+            habits = databases.child(self.userID).child("habits").get() #get user's habits
             if habits.each() is not None:
                 self.habit_list.clear()  # Clear the list before adding new items
                 for habit in habits.each():
@@ -546,7 +551,7 @@ class DeleteHabit(QDialog):
             return
 
         try:
-            databases.child(self.userID).child(habit_id).remove() #added userID
+            databases.child(self.userID).child("habits").child(habit_id).remove() #added userID
             QMessageBox.information(self, "Success", "Habit deleted successfully!")
             self.fetch_habits()  # Refresh the list after deletion
         except Exception as e:
