@@ -35,7 +35,8 @@ class Login(QMainWindow):
     def __init__(self):
         super(Login, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)
-
+        #added userID field
+        self.userID  = ""
         self.setStyleSheet(f"""
             background-color: {DARK_MODE_BG};
             color: {TEXT_COLOR_DARK};
@@ -88,7 +89,11 @@ class Login(QMainWindow):
 
         try:
             authfire.sign_in_with_email_and_password(email, password)
-            welcome_screen = WelcomeScreen()
+            #get userID
+            user = authfire.current_user
+            self.userID = user['localId']
+            #pass userID to welcome screen
+            welcome_screen = WelcomeScreen(self.userID)
             widget.addWidget(welcome_screen)
             widget.setCurrentWidget(welcome_screen)
         except:
@@ -182,9 +187,11 @@ class CreateAcc(QMainWindow):
 
 # --------------------- WelcomeScreen Window ---------------------
 class WelcomeScreen(QMainWindow):
-    def __init__(self):
+    def __init__(self,userID):
         super(WelcomeScreen, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "WelcomeScreen.ui"), self)
+        #add userID
+        self.userID = userID
 
         # Apply the background and text styles for the entire window
         self.setStyleSheet(f"""
@@ -291,12 +298,12 @@ class WelcomeScreen(QMainWindow):
         
 
     def on_add_habit(self):
-        self.add_habit = AddHabit()
+        self.add_habit = AddHabit(self.userID)#pass userID to addHabit
         self.add_habit.show()
         
 
     def on_delete_habit(self):
-        self.delete_habit = DeleteHabit()
+        self.delete_habit = DeleteHabit(self.userID)#pass userID to deleteHabit
         self.delete_habit.exec_()  # Show the DeleteHabit dialog
     
 
@@ -310,9 +317,10 @@ class AddHabit(QDialog):
     # Signal to close the dialog
     close_dialog_signal = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self,userID):
         super(AddHabit, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "AddHabit.ui"), self)
+        self.userID = userID # add userID
 
         # Connect the signal to the accept() method
         self.close_dialog_signal.connect(self.accept)
@@ -478,7 +486,7 @@ class AddHabit(QDialog):
 
         # Firebase save operation
         try:
-            databases.child("user").push(habit_data)
+            databases.child(self.userID).push(habit_data)#change node
             QMessageBox.information(self, "Success", "Habit added successfully!")
             self.close_dialog_signal.emit()
         except Exception as e:
@@ -488,10 +496,10 @@ class AddHabit(QDialog):
 # --------------------- DeleteHabit Dialogue --------------------
 
 class DeleteHabit(QDialog):
-    def __init__(self):
+    def __init__(self,userID): #add user ID
         super(DeleteHabit, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "DeleteHabit.ui"), self)
-
+        self.userID = userID #add user ID
         # Set styles
         self.setStyleSheet(f"""
             background-color: {DARK_MODE_BG};
@@ -511,7 +519,7 @@ class DeleteHabit(QDialog):
 
     def fetch_habits(self):
         try:
-            habits = databases.child("user").get()
+            habits = databases.child(self.userID).get() #
             if habits.each() is not None:
                 self.habit_list.clear()  # Clear the list before adding new items
                 for habit in habits.each():
@@ -550,11 +558,9 @@ widget = QStackedWidget()
 
 mainWindow = Login()
 createAccountWindow = CreateAcc()
-welcome_screen = WelcomeScreen()
 
 widget.addWidget(mainWindow)
 widget.addWidget(createAccountWindow)
-widget.addWidget(welcome_screen)
 
 widget.setFixedHeight(500)
 widget.setFixedWidth(650)
