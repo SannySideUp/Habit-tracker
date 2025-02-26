@@ -5,6 +5,10 @@ from PyQt5.QtCore import pyqtSignal, Qt
 import os
 import sys
 import pyrebase
+from collections import Counter as counter
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from crud.get import getUserDetails
+from crud.push import create_new_user_in_users,create_new_user_in_habits,addHabits
 
 # Firebase Configuration
 firebaseConfig = {
@@ -28,7 +32,6 @@ DARK_MODE_BG = "#15202B"
 LIGHT_MODE_BG = "#FFFFFF"
 TEXT_COLOR_LIGHT = "#000000"
 TEXT_COLOR_DARK = "#FFFFFF"
-
 
 # --------------------- Login Window ---------------------
 class Login(QMainWindow):
@@ -74,7 +77,6 @@ class Login(QMainWindow):
         self.email.setPlaceholderText("Email or Username")
         self.password.setPlaceholderText("Password")
         self.password.setEchoMode(QLineEdit.Password)
-
         self.pushButton.clicked.connect(self.login)
         self.signupbutton.clicked.connect(self.goCreateAccount)
         self.checkBox.clicked.connect(self.showPassword)
@@ -98,10 +100,10 @@ class Login(QMainWindow):
             widget.setCurrentWidget(welcome_screen)
         except:
             self.showError("Invalid Email or Password!")
-
+            
     def goCreateAccount(self):
         widget.setCurrentIndex(1)
-
+   
     def showError(self, message):
         error = QMessageBox()
         error.setIcon(QMessageBox.Critical)
@@ -151,7 +153,6 @@ class CreateAcc(QMainWindow):
 
         self.password.setEchoMode(QLineEdit.Password)
         self.confirmPassword.setEchoMode(QLineEdit.Password)
-
         self.signupbutton.clicked.connect(self.createAccountFunction)
 
     def createAccountFunction(self):
@@ -159,7 +160,7 @@ class CreateAcc(QMainWindow):
         password = self.password.text()
         confirm_password = self.confirmPassword.text()
         name = self.name.text() ###get user's name
-
+        
         if not email or not password or not confirm_password:
             self.showError("All fields are required!")
             return
@@ -167,7 +168,7 @@ class CreateAcc(QMainWindow):
         if password != confirm_password:
             self.showError("Passwords do not match!")
             return
-
+          
         if len(password) < 6:
             self.showError("Password must be at least 6 characters!")
             return
@@ -310,7 +311,6 @@ class WelcomeScreen(QMainWindow):
     def on_delete_habit(self):
         self.delete_habit = DeleteHabit(self.userID)#pass userID to deleteHabit
         self.delete_habit.exec_()  # Show the DeleteHabit dialog
-    
 
     def BackToLogin(self):
         widget.setCurrentIndex(0)
@@ -560,7 +560,6 @@ class DeleteHabit(QDialog):
 # --------------------- App Initialization ---------------------
 app = QApplication(sys.argv)
 widget = QStackedWidget()
-
 mainWindow = Login()
 createAccountWindow = CreateAcc()
 
@@ -579,12 +578,12 @@ widget = QStackedWidget()
 
 mainWindow = Login()
 createAccountWindow = CreateAcc()
-welcome_screen = WelcomeScreen()
+#welcome_screen = WelcomeScreen()
 
 
 widget.addWidget(mainWindow)
 widget.addWidget(createAccountWindow)
-widget.addWidget(welcome_screen)
+#widget.addWidget(welcome_screen)
 
 widget.setFixedHeight(500)
 widget.setFixedWidth(650)
