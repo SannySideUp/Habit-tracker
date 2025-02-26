@@ -519,7 +519,7 @@ class DeleteHabit(QDialog):
 
     def fetch_habits(self):
         try:
-            habits = databases.child(self.userID).get() #
+            habits = databases.child(self.userID).get() #get user's habits
             if habits.each() is not None:
                 self.habit_list.clear()  # Clear the list before adding new items
                 for habit in habits.each():
@@ -540,13 +540,13 @@ class DeleteHabit(QDialog):
             return
         
         habit_id = selected_habit.data(Qt.UserRole)
-        
+
         if habit_id is None:
             QMessageBox.critical(self, "Error", "Invalid habit selected.")
             return
 
         try:
-            databases.child("user").child(habit_id).remove()
+            databases.child(self.userID).child(habit_id).remove() #added userID
             QMessageBox.information(self, "Success", "Habit deleted successfully!")
             self.fetch_habits()  # Refresh the list after deletion
         except Exception as e:
