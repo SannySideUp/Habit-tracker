@@ -13,12 +13,16 @@
 |--------------|------------|
 |1. Sign up with email and password | **C** & **R** |
 |2. Login page | **C** & **R** |
-|3. Add new habit textbox| **P** |
-|4. Add new habit button | **P** |
-|5. Add new habit status (success/fail) | **P** |
-|6. Add habit details | **N**|
-|7. Streaks | **N**|
-|8. Progress report (Graphs etc) | **N**|
+|3. Add new habit textbox| **C** & **R** |
+|4. Add new habit button | **C** & **R** |
+|5. Add new habit status (success/fail) | **C** & **R** |
+|6. Add habit details | **C** & **R**|
+|7. Delete habit textbox| **C** & **R** |
+|8. Delete habit button | **C** & **R** |
+|9. Delete habit status (success/fail) | **C** & **R** |
+|10. View habits |**N**|
+|11. Streaks | **N**|
+|12. Progress report (Graphs etc) | **N**|
 
 ![Happy Pixel GIF by SMOL](https://github.com/user-attachments/assets/2e39cdca-5ea5-4467-bec3-980fd1ee8929)
 
