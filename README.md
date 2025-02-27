@@ -20,9 +20,11 @@
 |7. Delete habit textbox| **C** & **R** |
 |8. Delete habit button | **C** & **R** |
 |9. Delete habit status (success/fail) | **C** & **R** |
-|10. View habits |**N**|
-|11. Streaks | **N**|
-|12. Progress report (Graphs etc) | **N**|
+|10. Name component in Welcome screen for personalised greeting |**P**|
+|11. Daily quotes |**P**|
+|12. View habits |**N**|
+|13. Streaks | **N**|
+|14. Progress report (Graphs etc) | **N**|
 
 ![Happy Pixel GIF by SMOL](https://github.com/user-attachments/assets/2e39cdca-5ea5-4467-bec3-980fd1ee8929)
 
