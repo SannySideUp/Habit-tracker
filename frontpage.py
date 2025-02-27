@@ -7,8 +7,7 @@ import sys
 import pyrebase
 from collections import Counter as counter
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from crud.get import getUserDetails
-from crud.push import create_new_user_in_users,create_new_user_in_habits,addHabits
+
 
 # Firebase Configuration
 firebaseConfig = {
