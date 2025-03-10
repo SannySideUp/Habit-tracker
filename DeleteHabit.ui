@@ -1,0 +1,60 @@
+<ui version="4.0">
+  <class>Dialog</class>
+  <widget class="QDialog" name="Dialog">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>297</width>
+        <height>498</height>
+      </rect>
+    </property>
+    <property name="windowTitle">
+      <string>Delete Habit</string>
+    </property>
+    <widget class="QListWidget" name="habit_list">
+      <property name="geometry">
+        <rect>
+          <x>20</x>
+          <y>60</y>
+          <width>256</width>
+          <height>361</height>
+        </rect>
+      </property>
+    </widget>
+    <widget class="QPushButton" name="delete_button">
+      <property name="geometry">
+        <rect>
+          <x>160</x>
+          <y>450</y>
+          <width>113</width>
+          <height>32</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Delete</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="ListOfHabitsTitle">
+      <property name="geometry">
+        <rect>
+          <x>20</x>
+          <y>20</y>
+          <width>111</width>
+          <height>21</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>18</pointsize>
+        </font>
+      </property>
+      <property name="text">
+        <string>List of Habits</string>
+      </property>
+    </widget>
+  </widget>
+  <resources/>
+  <connections/>
+</ui>
+
