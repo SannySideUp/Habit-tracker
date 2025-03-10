@@ -6,10 +6,59 @@ from PyQt5.QtGui import QColor, QPalette
 import os
 import sys
 import pyrebase
+from PyQt5.QtWidgets import QDialog, QPushButton, QListWidget, QListWidgetItem, QMessageBox
+from PyQt5 import uic
+from PyQt5.QtCore import Qt, QTimer
+import os
+import datetime
 from collections import Counter as counter
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+HONEYCOMB_STYLESHEET = """
+    QDialog {
+        background-color: #F4D03F;  /* Yellow background */
+    }
+
+    QLabel {
+        color: #654321;  /* Brown text */
+        font-family: 'Comic Sans MS';
+        font-size: 24px;
+    }
+
+    QPushButton {
+        background-color: #D4AC0D;  /* Dark yellow */
+        color: #654321;  /* Brown text */
+        border: 2px solid #654321;
+        border-radius: 15px;
+        padding: 10px;
+        font-family: 'Comic Sans MS';
+        font-size: 18px;
+    }
+
+    QPushButton:hover {
+        background-color: #F1C40F;  /* Lighter yellow on hover */
+    }
+
+    QListWidget {
+        background-color: #F9E79F;  /* Light yellow */
+        color: #654321;  /* Brown text */
+        border: 2px solid #654321;
+        border-radius: 10px;
+        font-family: 'Comic Sans MS';
+        font-size: 16px;
+    }
+
+    QListWidget::item {
+        padding: 10px;
+        border-bottom: 1px solid #654321;  /* Brown separator */
+    }
+
+    QListWidget::item:selected {
+        background-color: #D4AC0D;  /* Dark yellow for selected items */
+        color: #654321;  /* Brown text */
+    }
+"""
 
 # Firebase Configuration
 firebaseConfig = {
@@ -325,6 +374,7 @@ class WelcomeScreen(QMainWindow):
         self.LogOut.clicked.connect(self.BackToLogin)
         self.ViewHabit.clicked.connect(self.view_habits) 
         self.Calendar.clicked.connect(self.show_calendar)
+        self.Streaks.clicked.connect(self.show_streaks)
         
 
 
@@ -347,6 +397,13 @@ class WelcomeScreen(QMainWindow):
 
     def BackToLogin(self):
         widget.setCurrentIndex(0)
+
+    def show_streaks(self):
+        """Create and show the Streak dialog."""
+        self.streak_dialog = Streak(self.userID, self)  # Pass self as the welcome_screen argument
+        self.hide()  # Hide the WelcomeScreen
+        self.streak_dialog.exec_()  # Show the Streak dialog as a modal window
+        self.show()
 
     
         
@@ -383,6 +440,213 @@ class ViewHabitScreen(QDialog):
                 self.habit_list.addItem("No habits found.")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load habits: {str(e)}")
+
+#========================================================================================================
+
+
+
+
+class Streak(QDialog):
+    def __init__(self, userID, welcome_screen):
+        super(Streak, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "Streaks.ui"), self)
+        self.userID = userID
+        self.welcome_screen = welcome_screen  # Store the WelcomeScreen instance
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
+
+        # Find the streakCounter label
+        self.streakCounter = self.findChild(QLabel, "streakCounter")
+        if not self.streakCounter:
+            print("Error: streakCounter label not found")
+
+        # Find the "back" button in the UI
+        self.back = self.findChild(QPushButton, "back")  # Use the correct objectName
+        if self.back:
+            self.back.clicked.connect(self.go_back_to_welcome_screen)
+        else:
+            print("Error: 'back' button not found in the UI file.")
+
+        # Find the "update" button in the UI
+        self.updateButton = self.findChild(QPushButton, "updateStreak")  # Replace with your button's objectName
+        if self.updateButton:
+            self.updateButton.clicked.connect(self.open_update_streaks)
+        else:
+            print("Error: 'updateButton' not found in the UI file.")
+
+        # Load the current streak counter
+        self.load_streak_counter()
+
+    def go_back_to_welcome_screen(self):
+        """Close the Streak dialog and show the WelcomeScreen."""
+        self.close()  # Close the Streak dialog
+        self.welcome_screen.show()  # Show the WelcomeScreen
+
+    def open_update_streaks(self):
+        """Open the UpdateStreaks dialog."""
+        self.update_streaks_dialog = UpdateStreaks(self.userID, self)  # Pass self (Streak dialog) to UpdateStreaks
+        self.update_streaks_dialog.exec_()  # Show the UpdateStreaks dialog as a modal window
+
+    def load_streak_counter(self):
+        """Load the current streak counter from the database and update the label."""
+        try:
+            streak_data = databases.child(self.userID).child("streakCounter").get()
+            if streak_data.val() is not None:
+                self.streakCounter.setText(str(streak_data.val()))
+            else:
+                self.streakCounter.setText("0")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load streak counter: {str(e)}")
+
+
+
+
+
+
+
+
+
+class UpdateStreaks(QDialog):
+    def __init__(self, userID, streak_dialog):
+        super(UpdateStreaks, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "updateStreaks.ui"), self)
+        self.userID = userID
+        self.streak_dialog = streak_dialog  # Store the Streak dialog reference
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
+
+
+        # Debug: Print all child widgets to verify the buttons exist
+        print("Child widgets:", self.findChildren(QPushButton))
+
+        # Find the addStreak button
+        self.addStreak = self.findChild(QPushButton, "addStreak")
+        if self.addStreak:
+            print("addStreak button found")
+            self.addStreak.clicked.connect(self.on_add_streak)
+            self.addStreak.setEnabled(False)  # Disable the button initially
+        else:
+            print("Error: addStreak button not found")
+
+        # Find the BACK button
+        self.backToStreaks = self.findChild(QPushButton, "backToStreaks")
+        if self.backToStreaks:
+            print("BACK button found")
+            self.backToStreaks.clicked.connect(self.close)
+        else:
+            print("Error: BACK button not found")
+
+        # Load habits into the habit_list widget
+        self.load_habits()
+
+        # Connect the itemChanged signal to check if all checkboxes are checked
+        self.habit_list.itemChanged.connect(self.check_all_checked)
+
+        # Check if the user can check the boxes (24-hour rule)
+        self.check_24_hour_rule()
+
+    def load_habits(self):
+        """Load habits from the database and display them in the habit_list widget with checkboxes."""
+        self.habit_list.clear()  # Clear existing habits
+        try:
+            habits = databases.child(self.userID).child("habits").get()
+            if habits.each():
+                for habit in habits.each():
+                    habit_data = habit.val()
+                    habit_text = f"{habit_data['title']} - {habit_data['start_date']} ({habit_data['difficulty']})"
+                    item = QListWidgetItem(habit_text)
+                    item.setCheckState(Qt.Unchecked)  # Add a checkbox
+                    self.habit_list.addItem(item)  # Add habit to the list
+            else:
+                self.habit_list.addItem("No habits found.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load habits: {str(e)}")
+
+    def check_all_checked(self):
+        """Check if all checkboxes are checked and enable/disable the addStreak button."""
+        all_checked = True
+        for index in range(self.habit_list.count()):
+            item = self.habit_list.item(index)
+            if item.checkState() != Qt.Checked:
+                all_checked = False
+                break
+        self.addStreak.setEnabled(all_checked)  # Enable the button only if all checkboxes are checked
+
+    def check_24_hour_rule(self):
+        """Check if the user can check the boxes (24-hour rule)."""
+        try:
+            last_checked_time = databases.child(self.userID).child("lastCheckedTime").get()
+            if last_checked_time.val():
+                last_checked = datetime.datetime.fromisoformat(last_checked_time.val())
+                current_time = datetime.datetime.now()
+                time_diff = (current_time - last_checked).total_seconds()
+
+                if time_diff < 86400:  # 24 hours in seconds
+                    # Disable checkboxes if less than 24 hours have passed
+                    for index in range(self.habit_list.count()):
+                        item = self.habit_list.item(index)
+                        item.setFlags(item.flags() & ~Qt.ItemIsEnabled)  # Disable the checkbox
+                    self.addStreak.setEnabled(False)
+                    QMessageBox.information(self, "Info", "You can only check the boxes once every 24 hours.")
+                else:
+                    # Reset the streak counter if more than 24 hours have passed
+                    databases.child(self.userID).child("streakCounter").set(0)
+                    self.streak_dialog.streakCounter.setText("0")
+                    QMessageBox.information(self, "Info", "Streak reset to 0 because you missed the 24-hour window.")
+            else:
+                # No last checked time, allow the user to check the boxes
+                pass
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to check 24-hour rule: {str(e)}")
+
+    def on_add_streak(self):
+        """Handle the ADD STREAK button click."""
+        try:
+            # Increment the streakCounter in the database
+            streak_data = databases.child(self.userID).child("streakCounter").get()
+            if streak_data.val() is None:
+                streak_counter = 1
+            else:
+                streak_counter = streak_data.val() + 1
+            databases.child(self.userID).child("streakCounter").set(streak_counter)
+
+            # Update the streakCounter label in the Streak dialog
+            self.streak_dialog.streakCounter.setText(str(streak_counter))
+
+            # Update the last checked time
+            current_time = datetime.datetime.now().isoformat()
+            databases.child(self.userID).child("lastCheckedTime").set(current_time)
+
+            # Disable checkboxes for 24 hours
+            for index in range(self.habit_list.count()):
+                item = self.habit_list.item(index)
+                item.setFlags(item.flags() & ~Qt.ItemIsEnabled)  # Disable the checkbox
+            self.addStreak.setEnabled(False)
+
+            # Show a success message
+            QMessageBox.information(self, "Success", f"Streak incremented to {streak_counter}!")
+
+            # Schedule a timer to re-enable checkboxes after 24 hours
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self.reset_checkboxes)
+            self.timer.start(86400000)  # 24 hours in milliseconds
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to update streak: {str(e)}")
+
+    def reset_checkboxes(self):
+        """Re-enable checkboxes after 24 hours."""
+        for index in range(self.habit_list.count()):
+            item = self.habit_list.item(index)
+            item.setFlags(item.flags() | Qt.ItemIsEnabled)  # Re-enable the checkbox
+        self.timer.stop()  # Stop the timer
+
+
+    
+
+    
+
+
+
+
+       
 
 
 # --------------------- Calendar button  -------------------- 
