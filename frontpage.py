@@ -90,38 +90,7 @@ class Login(QMainWindow):
         uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)
         #added userID field
         self.userID  = ""
-        self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
-            color: {TEXT_COLOR_DARK};
-            font-family: 'Segoe UI', Arial, sans-serif;
-        """)
-
-        self.pushButton.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-        """)
-
-        self.signupbutton.setStyleSheet(f"""
-            QPushButton {{
-                background-color: transparent;
-                color: {TWITTER_BLUE};
-                font-size: 14px;
-                border: none;
-            }}
-            QPushButton:hover {{
-                text-decoration: underline;
-            }}
-        """)
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
         
 
         # Placeholder Text
@@ -175,38 +144,7 @@ class CreateAcc(QMainWindow):
         super(CreateAcc, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "SignUp.ui"), self)
 
-        self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
-            color: {TEXT_COLOR_DARK};
-            font-family: 'Segoe UI', Arial, sans-serif;
-        """)
-
-        self.signupbutton.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-        """)
-
-        self.backToLogin.setStyleSheet(f"""
-            QPushButton {{
-                background-color: transparent;
-                color: {TWITTER_BLUE};
-                font-size: 14px;
-                border: none;
-            }}
-            QPushButton:hover {{
-                text-decoration: underline;
-            }}
-        """)
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
 
         # Placeholder text
         self.name.setPlaceholderText("Your Name")
@@ -268,105 +206,8 @@ class WelcomeScreen(QMainWindow):
         self.userID = userID #add userID
 
         # Apply the background and text styles for the entire window
-        self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
-            color: {TEXT_COLOR_DARK};
-            font-family: 'Segoe UI', Arial, sans-serif;
-        """)
-
-        # Apply the button styles
-        self.AddHabit.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-        """)
-        
-        self.DeleteHabit.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-        """)
-
-        self.ViewHabit.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-        """)
-
-        self.LogOut.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-        """)
-
-        self.Calendar.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-            QCalendarWidget {{
-                background-color: {TWITTER_BLUE};
-            }}
-        """)
-        
-        self.Streaks.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TWITTER_BLUE};
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                padding: 10px;
-                width: 250px;
-            }}
-            QPushButton:hover {{
-                background-color: #0D8AEF;
-            }}
-        """)
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
+         
 
         # Connections
         self.AddHabit.clicked.connect(self.on_add_habit)
@@ -416,7 +257,7 @@ class ViewHabitScreen(QDialog):
         self.userID = userID  # Store userID
 
         # Set up UI elements
-        self.setStyleSheet("background-color: #15202B; color: white;")
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
         self.habit_list = self.findChild(QListWidget, "habit_list") 
         self.close_button = self.findChild(QPushButton, "closebutton")  
 
@@ -688,103 +529,14 @@ class AddHabit(QDialog):
         self.close_dialog_signal.connect(self.accept)
 
         # Set background color and text color
-        self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
-            color: {TEXT_COLOR_DARK};
-            font-family: 'Segoe UI', Arial, sans-serif;
-        """)
-
-        # Set the style for the TitleInput (QLineEdit) with hover effect and dark blue input text
-        self.TitleInput.setStyleSheet("""
-            QLineEdit {
-                background-color: #FFFFFF;
-                border: 1px solid #CCCCCC;
-                border-radius: 5px;
-                padding: 5px;
-                color: #1D3C6A;  
-            }
-            QLineEdit:hover {
-                background-color: #D9F1FF;  
-            }
-        """)
-
-        # Set the style for the DescriptionInput (QTextEdit) with hover effect and dark blue input text
-        self.DescriptionInput.setStyleSheet("""
-            QTextEdit {
-                background-color: #FFFFFF;
-                border: 1px solid #CCCCCC;
-                border-radius: 5px;
-                padding: 5px;
-                color: #1D3C6A;  
-            }
-            QTextEdit:hover {
-                background-color: #D9F1FF;  
-            }
-        """)
-
-        # Set the style for the RepeatsBox (QComboBox) with hover effect and visible text
-        self.RepeatsBox.setStyleSheet("""
-            QComboBox {
-                background-color: #FFFFFF;
-                border: 1px solid #CCCCCC;
-                border-radius: 5px;
-                padding: 5px;
-                color: #1D3C6A;  
-            }
-            QComboBox:hover {
-                background-color: #D9F1FF;  
-            }
-            QComboBox:editable {
-                color: #1D3C6A;  
-            }
-        """)
-
-        # Set the style for the DifficultyBox (QComboBox) with hover effect and visible text
-        self.DifficultyBox.setStyleSheet("""
-            QComboBox {
-                background-color: #FFFFFF;
-                border: 1px solid #CCCCCC;
-                border-radius: 5px;
-                padding: 5px;
-                color: #1D3C6A;  
-            }
-            QComboBox:hover {
-                background-color: #D9F1FF;  
-            }
-            QComboBox:editable {
-                color: #1D3C6A;  
-            }
-        """)
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
+            
 
         # Set the style for the Save and Cancel buttons
         save_button = self.CancelSaveBox.button(QDialogButtonBox.Save)
         cancel_button = self.CancelSaveBox.button(QDialogButtonBox.Cancel)
 
-        save_button.setStyleSheet("""
-            QPushButton {
-                background-color: #A1D6FF;  
-                border: 1px solid #4A90E2;
-                border-radius: 5px;
-                padding: 10px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #91C9FF;  
-            }
-        """)
-
-        cancel_button.setStyleSheet("""
-            QPushButton {
-                background-color: #A1D6FF;  
-                border: 1px solid #4A90E2;
-                border-radius: 5px;
-                padding: 10px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #91C9FF;  
-            }
-        """)
+        
 
         # Set labels (DescriptionLabel, DifficultyLabel, RepeatsLabel, StartDateLabel, TitleLabel)
         self.DescriptionLabel.setStyleSheet("""
@@ -863,11 +615,7 @@ class DeleteHabit(QDialog):
         uic.loadUi(os.path.join(os.path.dirname(__file__), "DeleteHabit.ui"), self)
         self.userID = userID #add user ID
         # Set styles
-        self.setStyleSheet(f"""
-            background-color: {DARK_MODE_BG};
-            color: {TEXT_COLOR_DARK};
-            font-family: 'Segoe UI', Arial, sans-serif;
-        """)
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
 
         # Access the QListWidget and QPushButton
         self.habit_list = self.findChild(QListWidget, "habit_list")
