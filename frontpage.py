@@ -2,10 +2,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5 import uic, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QColor, QPalette
 import os
 import sys
 import pyrebase
 from collections import Counter as counter
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
@@ -72,12 +74,26 @@ class Login(QMainWindow):
             }}
         """)
 
+        self.forgotPassword.setStyleSheet(f"""
+            QPushButton {{
+                background-color: transparent;
+                color: {TWITTER_BLUE};
+                font-size: 14px;
+                border: none;
+            }}
+            QPushButton:hover {{
+                text-decoration: underline;
+            }}
+        """)
+        
+
         # Placeholder Text
         self.email.setPlaceholderText("Email or Username")
         self.password.setPlaceholderText("Password")
         self.password.setEchoMode(QLineEdit.Password)
         self.pushButton.clicked.connect(self.login)
         self.signupbutton.clicked.connect(self.goCreateAccount)
+        self.forgotPassword.clicked.connect(self.ForgotPassword)
         self.checkBox.clicked.connect(self.showPassword)
 
     def login(self):
@@ -115,6 +131,16 @@ class Login(QMainWindow):
             self.password.setEchoMode(QLineEdit.Normal)
         else:
             self.password.setEchoMode(QLineEdit.Password)
+    
+    def ForgotPassword(self):
+        email, ok = QInputDialog.getText(self, 'Reset Password', 'Enter your email:')
+        if ok and email:
+            try:
+                authfire.send_password_reset_email(email)
+                QMessageBox.information(self, 'Success', 'Password reset email sent!')
+            except Exception as e:
+                self.showError(f"Error: {str(e)}")
+
 
 
 # --------------------- Sign Up Window ---------------------
@@ -144,6 +170,18 @@ class CreateAcc(QMainWindow):
             }}
         """)
 
+        self.backToLogin.setStyleSheet(f"""
+            QPushButton {{
+                background-color: transparent;
+                color: {TWITTER_BLUE};
+                font-size: 14px;
+                border: none;
+            }}
+            QPushButton:hover {{
+                text-decoration: underline;
+            }}
+        """)
+
         # Placeholder text
         self.name.setPlaceholderText("Your Name")
         self.email.setPlaceholderText("Your Email")
@@ -153,6 +191,7 @@ class CreateAcc(QMainWindow):
         self.password.setEchoMode(QLineEdit.Password)
         self.confirmPassword.setEchoMode(QLineEdit.Password)
         self.signupbutton.clicked.connect(self.createAccountFunction)
+        self.backToLogin.clicked.connect(self.go_back_to_login)
 
     def createAccountFunction(self):
         email = self.email.text()
@@ -189,6 +228,10 @@ class CreateAcc(QMainWindow):
 
     def add_username(self, db, UUID, name): #add user name to display on welcome screen
         db.child(UUID).child("name").push(name)
+
+    def go_back_to_login(self):
+        widget.setCurrentIndex(0)  # Switch back to the login screen
+
 
 
 # --------------------- WelcomeScreen Window ---------------------
@@ -279,8 +322,11 @@ class WelcomeScreen(QMainWindow):
             QPushButton:hover {{
                 background-color: #0D8AEF;
             }}
+            QCalendarWidget {{
+                background-color: {TWITTER_BLUE};
+            }}
         """)
-
+        
         self.Streaks.setStyleSheet(f"""
             QPushButton {{
                 background-color: {TWITTER_BLUE};
@@ -300,11 +346,22 @@ class WelcomeScreen(QMainWindow):
         self.AddHabit.clicked.connect(self.on_add_habit)
         self.DeleteHabit.clicked.connect(self.on_delete_habit)
         self.LogOut.clicked.connect(self.BackToLogin)
+        self.ViewHabit.clicked.connect(self.view_habits) 
+        self.Calendar.clicked.connect(self.show_calendar)
         
+
 
     def on_add_habit(self):
         self.add_habit = AddHabit(self.userID)#pass userID to addHabit
         self.add_habit.show()
+    
+    def show_calendar(self):
+        calendar_dialog = CalendarDialog()  # Create the calendar dialog
+        calendar_dialog.exec_()
+
+    def view_habits(self):
+        self.view_habits_window = ViewHabitScreen(self.userID)
+        self.view_habits_window.exec_()
         
 
     def on_delete_habit(self):
@@ -314,6 +371,66 @@ class WelcomeScreen(QMainWindow):
     def BackToLogin(self):
         widget.setCurrentIndex(0)
 
+    
+        
+
+# --------------------- ViewHabit Screen -------------------- 
+class ViewHabitScreen(QDialog):
+    def __init__(self, userID):
+        super(ViewHabitScreen, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "ViewHabit.ui"), self)
+        self.userID = userID  # Store userID
+
+        # Set up UI elements
+        self.setStyleSheet("background-color: #15202B; color: white;")
+        self.habit_list = self.findChild(QListWidget, "habit_list") 
+        self.close_button = self.findChild(QPushButton, "closebutton")  
+
+        # Connect buttons
+        if self.close_button:
+            self.close_button.clicked.connect(self.close)
+
+        # Load habits initially
+        self.load_habits()
+
+    def load_habits(self):
+        self.habit_list.clear()  # Clear existing habits
+        try:
+            habits = databases.child(self.userID).child("habits").get()
+            if habits.each():
+                for habit in habits.each():
+                    habit_data = habit.val()
+                    habit_text = f"{habit_data['title']} - {habit_data['start_date']} ({habit_data['difficulty']})"
+                    self.habit_list.addItem(habit_text)  # Add habit to the list
+            else:
+                self.habit_list.addItem("No habits found.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load habits: {str(e)}")
+
+
+# --------------------- Calendar button  -------------------- 
+class CalendarDialog(QDialog):
+    def __init__(self):
+        super(CalendarDialog, self).__init__()
+
+        # Set window title and size
+        self.setWindowTitle("Calendar")
+        self.setFixedSize(600, 600)
+        
+        # Create the calendar widget
+        self.calendar = QCalendarWidget(self)
+        self.calendar.setGridVisible(True)
+        
+        # Create the layout
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.calendar)
+
+        # Add a close button
+        self.close_button = QPushButton("Close", self)
+        self.close_button.clicked.connect(self.close)
+        layout.addWidget(self.close_button)
+        
+        self.setLayout(layout)
 
 # --------------------- AddHabit Dialogue --------------------
 
