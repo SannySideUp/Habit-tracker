@@ -4,10 +4,10 @@
  <widget class="QMainWindow" name="HT">
   <property name="geometry">
    <rect>
-    <x>100</x>
-    <y>100</y>
+    <x>200</x>
+    <y>200</y>
     <width>450</width>
-    <height>400</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,18 +15,16 @@
   </property>
   <property name="styleSheet">
    <string notr="true">
-    background-color: #1DA1F2;
-    font-family: Arial, sans-serif;
    </string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>125</x>
       <y>50</y>
       <width>350</width>
-      <height>280</height>
+      <height>350</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout" stretch="2,2,2,2">
@@ -99,12 +97,6 @@
       <widget class="QPushButton" name="pushButton">
        <property name="styleSheet">
         <string notr="true">
-         background-color: #1DA1F2;
-         color: white;
-         font-size: 14px;
-         padding: 10px;
-         border-radius: 20px;
-         border: none;
         </string>
        </property>
        <property name="text">
@@ -116,12 +108,6 @@
       <widget class="QPushButton" name="signupbutton">
        <property name="styleSheet">
         <string notr="true">
-         background-color: #17BF63;
-         color: white;
-         font-size: 14px;
-         padding: 10px;
-         border-radius: 20px;
-         border: none;
         </string>
        </property>
        <property name="text">
@@ -133,10 +119,6 @@
       <widget class="QPushButton" name="forgotPassword">
        <property name="styleSheet">
         <string notr="true">
-         background-color: transparent;
-         color: white;
-         font-size: 12px;
-         text-decoration: underline;
         </string>
        </property>
        <property name="text">
