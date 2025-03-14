@@ -4,90 +4,125 @@
  <widget class="QMainWindow" name="HT">
   <property name="geometry">
    <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>412</width>
-    <height>301</height>
+    <x>200</x>
+    <y>200</y>
+    <width>450</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Login</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(143, 143, 143);
-border-color: rgb(69, 46, 182);</string>
+   <string notr="true">
+   </string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>381</width>
-      <height>241</height>
+      <x>125</x>
+      <y>50</y>
+      <width>350</width>
+      <height>350</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="3" column="0" colspan="2">
-      <widget class="QLabel" name="label_3">
-       <property name="styleSheet">
-        <string notr="true">color:rgb(255, 255, 255)</string>
-       </property>
-       <property name="text">
-        <string>Don't have an account?</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" colspan="3">
-      <widget class="QPushButton" name="pushButton">
-       <property name="styleSheet">
-        <string notr="true">color:rgb(255, 255, 255)</string>
-       </property>
-       <property name="text">
-        <string>Login</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QPushButton" name="signupbutton">
-       <property name="styleSheet">
-        <string notr="true">color:rgb(255, 255, 255)</string>
-       </property>
-       <property name="text">
-        <string>Sign Up</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="2,2,2,2">
+     <item>
       <widget class="QLabel" name="label">
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
        <property name="styleSheet">
-        <string notr="true">color:rgb(255, 255, 255)</string>
+        <string notr="true">color: white; font-size: 16px; font-weight: bold;</string>
        </property>
        <property name="text">
         <string>Email</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1" colspan="2">
-      <widget class="QLineEdit" name="email"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+     <item>
+      <widget class="QLineEdit" name="email">
        <property name="styleSheet">
-        <string notr="true">color:rgb(255, 255, 255)</string>
+        <string notr="true">
+         background-color: white;
+         color: black;
+         padding: 8px;
+         border-radius: 10px;
+         font-size: 14px;
+        </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: white; font-size: 16px; font-weight: bold;</string>
        </property>
        <property name="text">
         <string>Password</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" colspan="2">
+     <item>
       <widget class="QLineEdit" name="password">
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">
+         background-color: white;
+         color: black;
+         padding: 8px;
+         border-radius: 10px;
+         font-size: 14px;
+        </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="styleSheet">
+        <string notr="true">color: white; font-size: 12px;</string>
+       </property>
+       <property name="text">
+        <string>Show password</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="styleSheet">
+        <string notr="true">
+        </string>
+       </property>
+       <property name="text">
+        <string>Login</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="signupbutton">
+       <property name="styleSheet">
+        <string notr="true">
+        </string>
+       </property>
+       <property name="text">
+        <string>Sign Up</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="forgotPassword">
+       <property name="styleSheet">
+        <string notr="true">
+        </string>
+       </property>
+       <property name="text">
+        <string>Forgot Password?</string>
        </property>
       </widget>
      </item>
@@ -99,7 +134,7 @@ border-color: rgb(69, 46, 182);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>412</width>
+     <width>450</width>
      <height>18</height>
     </rect>
    </property>
