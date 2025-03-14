@@ -13,6 +13,8 @@ from PyQt5.QtCore import Qt, QTimer
 import os
 import datetime
 from collections import Counter as counter
+from google import genai
+from google.genai import types
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -42,7 +44,7 @@ HONEYCOMB_STYLESHEET = """
         border-radius: 16px;
         padding: 12px;
         font-family: 'Comic Sans MS';
-        font-size: 12px;
+        font-size: 16px;
         min-width: 20px;
         min-height: 15px;
     }
@@ -88,12 +90,11 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 databases = firebase.database()
 authfire = firebase.auth()
 
-# --------------------- Twitter-Style UI ---------------------
-TWITTER_BLUE = "#1DA1F2"
-DARK_MODE_BG = "#15202B"
-LIGHT_MODE_BG = "#FFFFFF"
-TEXT_COLOR_LIGHT = "#000000"
-TEXT_COLOR_DARK = "#FFFFFF"
+# Google API
+
+client = genai.Client(api_key="AIzaSyAC1frMF9t4FO9jld2-EhLJezzRafVc7Eg")
+Response = client.models.generate_content(model="gemini-2.0-flash", contents="alway give something unheard of to me just one out of the billions of small quote known in this world to inspire someone, also it should not be longer than 10 words")
+print(Response.text)
 
 # --------------------- Login Window ---------------------
 class Login(QMainWindow):
@@ -101,12 +102,9 @@ class Login(QMainWindow):
         super(Login, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "login.ui"), self)
         self.setWindowTitle("Habit Tracker")
-        #added userID field
-        self.userID  = ""
+        self.userID = ""
         self.setStyleSheet(HONEYCOMB_STYLESHEET)
-        
 
-        # Placeholder Text
         self.email.setPlaceholderText("Email or Username")
         self.password.setPlaceholderText("Password")
         self.password.setEchoMode(QLineEdit.Password)
@@ -116,7 +114,6 @@ class Login(QMainWindow):
         self.forgotPassword.clicked.connect(self.ForgetPassword)
 
     def login(self):
-        #global email
         email = self.email.text()
         password = self.password.text()
         if not email or not password:
@@ -125,17 +122,21 @@ class Login(QMainWindow):
 
         try:
             user = authfire.sign_in_with_email_and_password(email, password)
-            #get userID
-            #user = authfire.current_user()
+            user_info = authfire.get_account_info(user['idToken'])
+            
+            if not user_info['users'][0]['emailVerified']:
+                self.showError("Please verify your email before logging in!")
+                return
+
             self.userID = user['localId']
             welcome_screen = WelcomeScreen(self.userID)
             widget.addWidget(welcome_screen)
             widget.setCurrentWidget(welcome_screen)
-            #self.email.clear()
-            #self.password.clear()
-        except:
-            self.showError("Invalid Email or Password!")
-            #self.password.clear()
+            self.email.clear()
+            self.password.clear()
+        except Exception as e:
+            self.showError(f"Invalid Email or Password! {str(e)}")
+            self.password.clear()
             
     def goCreateAccount(self):
         widget.setCurrentIndex(1)
@@ -159,8 +160,8 @@ class Login(QMainWindow):
             try:
                 authfire.send_password_reset_email(email)
                 QMessageBox.information(self, 'Success', 'Password reset email sent!')
-            except Exception as e:
-                self.showError(f"Error: Invaild Email")
+            except Exception:
+                self.showError("Error: Invalid Email")
 
 
 # --------------------- Sign Up Window ---------------------
@@ -169,11 +170,8 @@ class CreateAcc(QMainWindow):
         super(CreateAcc, self).__init__()
         self.setWindowTitle("Habit Tracker")
         uic.loadUi(os.path.join(os.path.dirname(__file__), "SignUp.ui"), self)
-        
-
         self.setStyleSheet(HONEYCOMB_STYLESHEET)
 
-        # Placeholder text
         self.name.setPlaceholderText("Your Name")
         self.email.setPlaceholderText("Your Email")
         self.password.setPlaceholderText("Create a Password")
@@ -190,7 +188,7 @@ class CreateAcc(QMainWindow):
         confirm_password = self.confirmPassword.text()
         name = self.name.text()
         
-        if not email or not password or not confirm_password:
+        if not email or not password or not confirm_password or not name:
             self.showError("All fields are required!")
             return
 
@@ -205,15 +203,18 @@ class CreateAcc(QMainWindow):
         try:
             user = authfire.create_user_with_email_and_password(email, password)
             userID = user['localId']
-            self.add_username(databases,userID,name)
+            self.add_username(databases, userID, name)
+            authfire.send_email_verification(user['idToken'])
+            QMessageBox.information(self, 'Verification Sent', 'Please check your email to verify your account!')
             widget.setCurrentIndex(0)
             self.email.clear()
             self.password.clear()
             self.confirmPassword.clear()
             self.name.clear()
-        except:
+        except Exception as e:
             self.showError("Account creation failed. Try again.")
-
+            print(e)
+        
     def showError(self, message):
         error = QMessageBox()
         error.setIcon(QMessageBox.Warning)
@@ -221,16 +222,15 @@ class CreateAcc(QMainWindow):
         error.setWindowTitle("Signup Error")
         error.exec_()
 
-    def add_username(self, db, UUID, name): #add user name to display on welcome screen
-        db.child(UUID).child("name").push(name)
+    def add_username(self, db, UUID, name):
+        db.child(UUID).child("name").set(name)
 
     def go_back_to_login(self):
-        widget.setCurrentIndex(0)  # Switch back to the login screen
+        widget.setCurrentIndex(0)
         self.email.clear()
         self.password.clear()
         self.confirmPassword.clear()
         self.name.clear()
-
 
 
 # --------------------- WelcomeScreen Window ---------------------
@@ -239,12 +239,20 @@ class WelcomeScreen(QMainWindow):
         super(WelcomeScreen, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "WelcomeScreen.ui"), self)
         self.setWindowTitle("Habit Tracker")
-        self.userID = userID #add userID
-        name = databases.child(self.userID).child("name").get()
+        self.userID = userID
+        username = databases.child(userID).child("name").get()
+        name = username.val()
+        self.Quote.setStyleSheet(
+            """QLabel{
+            font-size: 16px;
+            }"""
+        )
 
         # Apply the background and text styles for the entire window
         self.setStyleSheet(HONEYCOMB_STYLESHEET)
-        self.QuoteOwner.changeQlabel(name)
+        self.Quote.setText(Response.text)
+        self.QuoteOwner.setText(name)
+        
         
          
 
@@ -710,8 +718,9 @@ widget.addWidget(createAccountWindow)
 
 widget.setWindowTitle("Habit Tracker")
 widget.setWindowIcon(QtGui.QIcon(icon_path))  # Ensures the window also has the icon
-widget.setFixedHeight(500)
+widget.setFixedHeight(650)
 widget.setFixedWidth(650)
+#widget.showFullScreen()
 widget.show()
 
 sys.exit(app.exec_())
