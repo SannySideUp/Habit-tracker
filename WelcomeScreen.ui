@@ -65,9 +65,9 @@
    <widget class="QLabel" name="Quote">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>20</x>
       <y>150</y>
-      <width>481</width>
+      <width>600</width>
       <height>51</height>
      </rect>
     </property>
@@ -77,7 +77,7 @@
      </font>
     </property>
     <property name="text">
-     <string>“No act of kindness, no matter how small, is ever wasted.”</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="QuoteOwner">
@@ -95,7 +95,7 @@
      </font>
     </property>
     <property name="text">
-     <string>-Aesop</string>
+     <string/>
     </property>
    </widget>
    <widget class="QPushButton" name="AddHabit">
@@ -183,7 +183,7 @@
      <x>0</x>
      <y>0</y>
      <width>635</width>
-     <height>24</height>
+     <height>18</height>
     </rect>
    </property>
   </widget>

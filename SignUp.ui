@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>412</width>
-    <height>301</height>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,13 +21,26 @@ border-color: rgb(69, 46, 182);</string>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>20</y>
+      <x>125</x>
+      <y>50</y>
       <width>381</width>
-      <height>181</height>
+      <height>300</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="3" column="0">
+      <widget class="QLabel" name="password_text">
+       <property name="styleSheet">
+        <string notr="true">color:rgb(255, 255, 255)</string>
+       </property>
+       <property name="text">
+        <string>Password</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" colspan="2">
+      <widget class="QLineEdit" name="email"/>
+     </item>
      <item row="3" column="1" colspan="2">
       <widget class="QLineEdit" name="password">
        <property name="autoFillBackground">
@@ -48,18 +61,18 @@ border-color: rgb(69, 46, 182);</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="password_text">
+     <item row="1" column="0">
+      <widget class="QLabel" name="username_text_2">
        <property name="styleSheet">
         <string notr="true">color:rgb(255, 255, 255)</string>
        </property>
        <property name="text">
-        <string>Password</string>
+        <string>name</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1" colspan="2">
-      <widget class="QLineEdit" name="email"/>
+     <item row="1" column="1" colspan="2">
+      <widget class="QLineEdit" name="name"/>
      </item>
      <item row="5" column="0" colspan="3">
       <widget class="QPushButton" name="signupbutton">
@@ -68,16 +81,6 @@ border-color: rgb(69, 46, 182);</string>
        </property>
        <property name="text">
         <string>Sign Up</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1" colspan="2">
-      <widget class="QLineEdit" name="confirmPassword">
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
        </property>
       </widget>
      </item>
@@ -91,18 +94,22 @@ border-color: rgb(69, 46, 182);</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="username_text_2">
-       <property name="styleSheet">
-        <string notr="true">color:rgb(255, 255, 255)</string>
+     <item row="4" column="1" colspan="2">
+      <widget class="QLineEdit" name="confirmPassword">
+       <property name="autoFillBackground">
+        <bool>false</bool>
        </property>
-       <property name="text">
-        <string>name</string>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QLineEdit" name="name"/>
+     <item row="6" column="2">
+      <widget class="QPushButton" name="backToLogin">
+       <property name="text">
+        <string>Back</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
