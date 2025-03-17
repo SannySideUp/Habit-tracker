@@ -10,7 +10,6 @@ import pyrebase
 from PyQt5.QtWidgets import QDialog, QPushButton, QListWidget, QListWidgetItem, QMessageBox
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QTimer
-import os
 import datetime
 from collections import Counter as counter
 from google import genai
@@ -93,7 +92,7 @@ authfire = firebase.auth()
 # Google API
 
 client = genai.Client(api_key="AIzaSyAC1frMF9t4FO9jld2-EhLJezzRafVc7Eg")
-Response = client.models.generate_content(model="gemini-2.0-flash", contents="alway give something unheard of to me just one out of the billions of small quote known in this world to inspire someone, also it should not be longer than 10 words")
+Response = client.models.generate_content(model="gemini-2.0-flash", contents="Give me the qoute of the day, also it should not be longer than 10 words")
 print(Response.text)
 
 # --------------------- Login Window ---------------------
@@ -105,13 +104,17 @@ class Login(QMainWindow):
         self.userID = ""
         self.setStyleSheet(HONEYCOMB_STYLESHEET)
 
-        self.email.setPlaceholderText("Email or Username")
+        self.email.setPlaceholderText("Email")
         self.password.setPlaceholderText("Password")
+
         self.password.setEchoMode(QLineEdit.Password)
         self.pushButton.clicked.connect(self.login)
         self.signupbutton.clicked.connect(self.goCreateAccount)
         self.checkBox.clicked.connect(self.showPassword)
         self.forgotPassword.clicked.connect(self.ForgetPassword)
+        
+        self.email.returnPressed.connect(self.focusPassword)
+        self.password.returnPressed.connect(self.login)
 
     def login(self):
         email = self.email.text()
@@ -162,6 +165,9 @@ class Login(QMainWindow):
                 QMessageBox.information(self, 'Success', 'Password reset email sent!')
             except Exception:
                 self.showError("Error: Invalid Email")
+    
+    def focusPassword(self):
+        self.password.setFocus()
 
 
 # --------------------- Sign Up Window ---------------------
@@ -181,6 +187,8 @@ class CreateAcc(QMainWindow):
         self.confirmPassword.setEchoMode(QLineEdit.Password)
         self.signupbutton.clicked.connect(self.createAccountFunction)
         self.backToLogin.clicked.connect(self.go_back_to_login)
+    
+        self.confirmPassword.returnPressed.connect(self.createAccountFunction)
 
     def createAccountFunction(self):
         email = self.email.text()
