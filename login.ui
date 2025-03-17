@@ -4,9 +4,9 @@
  <widget class="QMainWindow" name="HT">
   <property name="geometry">
    <rect>
-    <x>200</x>
-    <y>200</y>
-    <width>450</width>
+    <x>0</x>
+    <y>0</y>
+    <width>533</width>
     <height>500</height>
    </rect>
   </property>
@@ -14,8 +14,7 @@
    <string>Login</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">
-   </string>
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="layoutWidget">
@@ -27,17 +26,17 @@
       <height>350</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="2,2,2,2">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="2,2,2,2,0,0,0,0">
      <item>
       <widget class="QLabel" name="label">
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
        <property name="styleSheet">
         <string notr="true">color: white; font-size: 16px; font-weight: bold;</string>
        </property>
        <property name="text">
         <string>Email</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -56,22 +55,19 @@
      </item>
      <item>
       <widget class="QLabel" name="label_2">
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
        <property name="styleSheet">
         <string notr="true">color: white; font-size: 16px; font-weight: bold;</string>
        </property>
        <property name="text">
         <string>Password</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QLineEdit" name="password">
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
        <property name="styleSheet">
         <string notr="true">
          background-color: white;
@@ -80,6 +76,9 @@
          border-radius: 10px;
          font-size: 14px;
         </string>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
        </property>
       </widget>
      </item>
@@ -96,8 +95,7 @@
      <item>
       <widget class="QPushButton" name="pushButton">
        <property name="styleSheet">
-        <string notr="true">
-        </string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Login</string>
@@ -107,8 +105,7 @@
      <item>
       <widget class="QPushButton" name="signupbutton">
        <property name="styleSheet">
-        <string notr="true">
-        </string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Sign Up</string>
@@ -118,8 +115,7 @@
      <item>
       <widget class="QPushButton" name="forgotPassword">
        <property name="styleSheet">
-        <string notr="true">
-        </string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Forgot Password?</string>
@@ -134,7 +130,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>450</width>
+     <width>533</width>
      <height>18</height>
     </rect>
    </property>
