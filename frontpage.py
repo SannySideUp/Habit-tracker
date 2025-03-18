@@ -14,6 +14,7 @@ import datetime
 from collections import Counter as counter
 from google import genai
 from google.genai import types
+import random
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -89,11 +90,60 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 databases = firebase.database()
 authfire = firebase.auth()
 
-# Google API
+#client = genai.Client(api_key="AIzaSyAC1frMF9t4FO9jld2-EhLJezzRafVc7Eg")
+#Response = client.models.generate_content(model="gemini-2.0-flash", contents=f"Give me the qoute of the day, also it should not be longer than 10 words also, IF AND ONLY IF it is not any of these quotes {all_quotes}")
 
+# Google API
+AI_quotes = []
+User_quotes = []
+
+try:
+    quotes = databases.child("Quote").get()
+    quotes_data = quotes.val()
+
+    if quotes_data is not None:
+        if isinstance(quotes_data, dict):
+            for key in quotes_data:
+                AI_quotes.append(quotes_data[key])
+        else:
+            print("No quotes found in the database.")
+except Exception as e:
+    print(e)
 client = genai.Client(api_key="AIzaSyAC1frMF9t4FO9jld2-EhLJezzRafVc7Eg")
-Response = client.models.generate_content(model="gemini-2.0-flash", contents="Give me the qoute of the day, also it should not be longer than 10 words")
-print(Response.text)
+Response = client.models.generate_content(model="gemini-2.0-flash", contents=f"Give me the qoute of the day, also it should not be longer than 10 words also, IF AND ONLY IF it is not any of these quotes {AI_quotes}")
+#if Response.text not in AI_quotes:
+#    databases.child("Quote").push(Response.text)
+
+UQuotes = databases.child("UserQuotes").get().val()
+
+if UQuotes is not None:
+    if isinstance(UQuotes,dict):
+        for key in UQuotes:
+            EachQuote = databases.child("UserQuotes").child(key).get().val()
+            for User_ in EachQuote:
+                names = databases.child("UserQuotes").child(key).child(User_).get().key()
+                TheirQuotes = databases.child("UserQuotes").child(key).child(User_).get().val()
+                User_quotes.append({names:TheirQuotes})
+
+if AI_quotes and User_quotes:
+    if random.choice([True, False]):  
+        selected_quote = random.choice(AI_quotes)
+        if Response.text not in AI_quotes:
+            databases.child("Quote").push(Response.text)
+    else:
+        user_entry = random.choice(User_quotes)
+        username, quote = next(iter(user_entry.items()))
+        selected_quote = f'"{quote}" - By user: {username}'
+elif AI_quotes:
+    selected_quote = random.choice(AI_quotes)
+    if Response.text not in AI_quotes:
+        databases.child("Quote").push(Response.text)
+else:
+    user_entry = random.choice(User_quotes)
+    username, quote = next(iter(user_entry.items()))
+    selected_quote = f'"{quote}" - By user: {username}'
+
+print(f"Today's Quote: {selected_quote}")
 
 # --------------------- Login Window ---------------------
 class Login(QMainWindow):
@@ -187,7 +237,10 @@ class CreateAcc(QMainWindow):
         self.confirmPassword.setEchoMode(QLineEdit.Password)
         self.signupbutton.clicked.connect(self.createAccountFunction)
         self.backToLogin.clicked.connect(self.go_back_to_login)
-    
+
+        self.name.returnPressed.connect(self.focusEmail)
+        self.email.returnPressed.connect(self.focusPassword)
+        self.password.returnPressed.connect(self.focusConfirmPassword)
         self.confirmPassword.returnPressed.connect(self.createAccountFunction)
 
     def createAccountFunction(self):
@@ -239,6 +292,15 @@ class CreateAcc(QMainWindow):
         self.password.clear()
         self.confirmPassword.clear()
         self.name.clear()
+    
+    def focusEmail(self):
+        self.email.setFocus()
+    
+    def focusPassword(self):
+        self.password.setFocus()
+    
+    def focusConfirmPassword(self):
+        self.confirmPassword.setFocus()
 
 
 # --------------------- WelcomeScreen Window ---------------------
@@ -258,7 +320,7 @@ class WelcomeScreen(QMainWindow):
 
         # Apply the background and text styles for the entire window
         self.setStyleSheet(HONEYCOMB_STYLESHEET)
-        self.Quote.setText(Response.text)
+        self.Quote.setText(selected_quote)
         self.QuoteOwner.setText(name)
         
         
@@ -269,19 +331,19 @@ class WelcomeScreen(QMainWindow):
         self.DeleteHabit.clicked.connect(self.on_delete_habit)
         self.LogOut.clicked.connect(self.BackToLogin)
         self.ViewHabit.clicked.connect(self.view_habits) 
-        self.Calendar.clicked.connect(self.show_calendar)
+        self.SendQuote.clicked.connect(self.quote_sharing)
         self.Streaks.clicked.connect(self.show_streaks)
 
         
 
 
     def on_add_habit(self):
-        self.add_habit = AddHabit(self.userID)#pass userID to addHabit
+        self.add_habit = AddHabit(self.userID)
         self.add_habit.show()
     
-    def show_calendar(self):
-        calendar_dialog = CalendarDialog()  # Create the calendar dialog
-        calendar_dialog.exec_()
+    def quote_sharing(self):
+        quote_sharing = QuoteSharing(self.userID)
+        quote_sharing.exec_()
 
     def view_habits(self):
         self.view_habits_window = ViewHabitScreen(self.userID)
@@ -289,17 +351,17 @@ class WelcomeScreen(QMainWindow):
         
 
     def on_delete_habit(self):
-        self.delete_habit = DeleteHabit(self.userID)#pass userID to deleteHabit
-        self.delete_habit.exec_()  # Show the DeleteHabit dialog
+        self.delete_habit = DeleteHabit(self.userID)
+        self.delete_habit.exec_()
 
     def BackToLogin(self):
         widget.setCurrentIndex(0)
 
     def show_streaks(self):
         """Create and show the Streak dialog."""
-        self.streak_dialog = Streak(self.userID, self)  # Pass self as the welcome_screen argument
-        self.hide()  # Hide the WelcomeScreen
-        self.streak_dialog.exec_()  # Show the Streak dialog as a modal window
+        self.streak_dialog = Streak(self.userID, self) 
+        self.hide()
+        self.streak_dialog.exec_()
         self.show()
         
 
@@ -309,7 +371,7 @@ class ViewHabitScreen(QDialog):
         super(ViewHabitScreen, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(__file__), "ViewHabit.ui"), self)
         self.setWindowIcon(QtGui.QIcon("logo.jpg"))
-        self.userID = userID  # Store userID
+        self.userID = userID 
 
         # Set up UI elements
         self.setStyleSheet(HONEYCOMB_STYLESHEET)
@@ -531,35 +593,53 @@ class UpdateStreaks(QDialog):
         self.timer.stop()  # Stop the timer     
 
 
-# --------------------- Calendar button  -------------------- 
-class CalendarDialog(QDialog):
-    def __init__(self):
-        super(CalendarDialog, self).__init__()
+# --------------------- Sharing quotes button  -------------------- 
+class QuoteSharing(QDialog):
 
-        # Set window title and size
-        self.setWindowTitle("Calendar")
+    def __init__(self, userID):
+        super(QuoteSharing, self).__init__()
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "QuoteSharing.ui"), self)
         self.setWindowIcon(QtGui.QIcon("logo.jpg"))
-        self.setFixedSize(600, 600)
+        self.setStyleSheet(HONEYCOMB_STYLESHEET)
+        self.userID = userID
         
-        # Create the calendar widget
-        self.calendar = QCalendarWidget(self)
-        self.calendar.setGridVisible(True)
-        
-        # Create the layout
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.calendar)
+        self.submitButton.clicked.connect(self.submit_quote)
 
-        # Add a close button
-        self.close_button = QPushButton("Close", self)
-        self.close_button.clicked.connect(self.close)
-        layout.addWidget(self.close_button)
+    def submit_quote(self):
+
+        username = databases.child(self.userID).child("name").get().val()
+
+        quote_text = self.Quote.toPlainText().strip()
+
+        if not quote_text:
+            QMessageBox.warning(self, "Error", "Please enter a quote before submitting.")
+            return
         
-        self.setLayout(layout)
+        
+        prompt = f"Does this quote look appropriate for public view? Reply with only 'true' or 'false': {quote_text}"
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        
+        if not response or not hasattr(response, "text"):
+            QMessageBox.critical(self, "Error", "Failed to verify quote with AI moderation.")
+            return
+
+        ai_decision = response.text.strip().lower()
+        
+        if ai_decision == "true":
+            try:
+                databases.child("UserQuotes").push({username: quote_text})
+                QMessageBox.information(self, "Success", "Your quote has been submitted!")
+                self.Quote.clear()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to submit quote: {str(e)}")
+        else:
+            QMessageBox.warning(self, "Rejected", "Your quote was deemed inappropriate for public view.")
+
 
 # --------------------- AddHabit Dialogue --------------------
 
 class AddHabit(QDialog):
-    # Signal to close the dialog
+    
     close_dialog_signal = pyqtSignal()
 
     def __init__(self,userID):

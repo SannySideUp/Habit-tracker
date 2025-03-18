@@ -150,7 +150,7 @@
      <string>Logout</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Calendar">
+   <widget class="QPushButton" name="SendQuote">
     <property name="geometry">
      <rect>
       <x>220</x>
@@ -160,7 +160,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Calendar</string>
+     <string>Send Quote</string>
     </property>
    </widget>
    <widget class="QPushButton" name="Streaks">
